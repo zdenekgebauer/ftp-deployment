@@ -13,9 +13,10 @@ Fork [dg/ftp-deployment](https://github.com/dg/ftp-deployment). Dokumentace upst
 |---|---|---|
 | testovací FTP/SFTP servery v Dockeru | `tests/servers/` | jen ve forku |
 | build pharu přes [Box](https://github.com/box-project/box) (`box` a `composer` v PATH): `./build-phar.sh [out.phar]` | `box.json`, `build-phar.sh`, `.gitignore` | upstream build skript nemá (`AGENTS.md` odkazuje na neexistující `create-phar/`) |
+| `remote: mkdir\|rmdir\|unlink\|mv\|chmod` bere relativní cestu vůči `remote`, absolutní ponechá (upstream od `34243a3` dělá z `x` vždy `/x`) | `src/Deployment/JobRunner.php`, `tests/JobRunner.remote.phpt` | větev `fix-remote-job-paths`, PR k issue [#180](https://github.com/dg/ftp-deployment/issues/180) zatím neodeslán |
 
 ## Známé chyby upstreamu
 
 | chyba | reprodukce | stav |
 |---|---|---|
-| `JobRunner::remote()` ignoruje `remoteDir`: `remote: mkdir\|rmdir\|unlink\|mv\|chmod x` míří na `/x` místo `<remote>/x` (od `34243a3`) | `tests/servers/*.ini` | issue [#180](https://github.com/dg/ftp-deployment/issues/180), oprava rozpracovaná |
+| `composer phpstan` hlásí 1 chybu v `Deployer.php:481` (`implode` s `callable&list<mixed>`) | `composer phpstan` | v upstreamu, informativní |
