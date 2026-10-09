@@ -1,5 +1,6 @@
 {
 	"files": ["src/deployment.php"],
 	"force-autodiscovery": true,
-	"compression": "GZ"
+	"compression": "GZ",
+	"compactors": ["KevinGH\\Box\\Compactor\\Php"]
 }
