@@ -1,0 +1,5 @@
+{
+	"files": ["src/deployment.php"],
+	"force-autodiscovery": true,
+	"compression": "GZ"
+}

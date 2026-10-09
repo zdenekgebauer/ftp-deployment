@@ -12,6 +12,7 @@ Fork [dg/ftp-deployment](https://github.com/dg/ftp-deployment). Dokumentace upst
 | úprava | soubory | stav upstreamu |
 |---|---|---|
 | testovací FTP/SFTP servery v Dockeru | `tests/servers/` | jen ve forku |
+| build pharu přes [Box](https://github.com/box-project/box) (`box` a `composer` v PATH): `./build-phar.sh [out.phar]` | `box.json`, `build-phar.sh`, `.gitignore` | upstream build skript nemá (`AGENTS.md` odkazuje na neexistující `create-phar/`) |
 
 ## Známé chyby upstreamu
 
