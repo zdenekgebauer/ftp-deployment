@@ -1,0 +1,30 @@
+# Test FTP and SFTP servers for manual/integration testing of deployments, see readme.md
+name: ftp-deployment-test
+
+services:
+  ftp:
+    image: delfer/alpine-ftp-server:latest
+    environment:
+      USERS: "deploy|deploy|/home/deploy|1000"
+    # own config: foreground vsftpd (the image's default start has a pidproxy race), chroot like real hostings;
+    # copied because vsftpd refuses a config file not owned by root
+    command: sh -c "install -m 644 /vsftpd.conf /etc/vsftpd/vsftpd.conf && exec vsftpd /etc/vsftpd/vsftpd.conf"
+    ports:
+      - "127.0.0.1:2121:21"
+      - "127.0.0.1:21100-21109:21100-21109"
+    volumes:
+      - ./data/ftp:/home/deploy
+      - ./vsftpd.conf:/vsftpd.conf:ro
+
+  sftp:
+    image: lscr.io/linuxserver/openssh-server:latest
+    environment:
+      PUID: 1000
+      PGID: 1000
+      USER_NAME: deploy
+      USER_PASSWORD: deploy
+      PASSWORD_ACCESS: "true"
+    ports:
+      - "127.0.0.1:2222:2222"
+    volumes:
+      - ./data/sftp:/config/www
