@@ -37,6 +37,9 @@ class Deployer
 
 	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
 	public array $runAfter = [];
+
+	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
+	public array $runFinally = [];
 	public string $tempDir = '';
 
 	/** @var string[] */
@@ -78,6 +81,18 @@ class Deployer
 		$this->server->connect();
 		$this->remoteDir = $this->server->getDir();
 
+		try {
+			$this->synchronize();
+		} catch (\Throwable $e) {
+			$this->runFinallyJobs($e);
+			throw $e;
+		}
+		$this->runFinallyJobs(null);
+	}
+
+
+	private function synchronize(): void
+	{
 		$localBefore = $otherBefore = [];
 		foreach ($this->runBefore as $job) {
 			if (is_string($job) && str_starts_with($job, 'local:')) {
@@ -232,6 +247,35 @@ class Deployer
 				$this->logger->log("\nDeleting temporary files:");
 				$this->deletePaths(array_keys($tempFiles));
 			}
+		}
+	}
+
+
+	/**
+	 * Runs all finally-jobs even if some of them fail; their error never masks the one of the deployment.
+	 * @throws \Throwable  the first job error, if the deployment itself succeeded
+	 */
+	private function runFinallyJobs(?\Throwable $deployError): void
+	{
+		if (!$this->runFinally || $this->testMode) {
+			return;
+		}
+
+		$this->logger->log("\nFinally-jobs:");
+		$firstError = null;
+		foreach ($this->runFinally as $job) {
+			try {
+				$this->runJobs([$job]);
+			} catch (TerminatedException $e) {
+				throw $e;
+			} catch (\Throwable $e) {
+				$this->logger->log("Error: {$e->getMessage()}", 'red');
+				$firstError ??= $e;
+			}
+		}
+
+		if ($firstError && !$deployError) {
+			throw $firstError;
 		}
 	}
 

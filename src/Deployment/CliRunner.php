@@ -28,6 +28,7 @@ class CliRunner
 		'before' => '',
 		'afterupload' => '',
 		'after' => '',
+		'finally' => '',
 		'preprocess' => false,
 	];
 
@@ -189,6 +190,7 @@ class CliRunner
 		$deployment->runBefore = self::toArray($config['before'], true);
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);
 		$deployment->runAfter = self::toArray($config['after'], true);
+		$deployment->runFinally = self::toArray($config['finally'], true);
 		$deployment->testMode = !empty($config['test']) || $this->mode === 'test';
 
 		return $deployment;
