@@ -46,6 +46,7 @@ class Deployer
 	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
 	public array $runFinally = [];
 	public string $tempDir = '';
+	public bool $followRedirects = true;
 
 	/** @var string[] */
 	public array $preprocessMasks = [];
@@ -711,6 +712,7 @@ class Deployer
 	private function runJobs(array $jobs): void
 	{
 		$runner = new JobRunner($this->server, $this->localDir, $this->remoteDir);
+		$runner->followRedirects = $this->followRedirects;
 
 		foreach ($jobs as $job) {
 			$jobName = is_string($job) ? $job : 'callable';
