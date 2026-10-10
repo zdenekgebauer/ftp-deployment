@@ -8,13 +8,14 @@ services:
       USERS: "deploy|deploy|/home/deploy|1000"
     # own config: foreground vsftpd (the image's default start has a pidproxy race), chroot like real hostings;
     # copied because vsftpd refuses a config file not owned by root
-    command: sh -c "install -m 644 /vsftpd.conf /etc/vsftpd/vsftpd.conf && exec vsftpd /etc/vsftpd/vsftpd.conf"
+    command: sh -c "install -m 644 /servers/vsftpd.conf /etc/vsftpd/vsftpd.conf && exec vsftpd /etc/vsftpd/vsftpd.conf"
     ports:
       - "127.0.0.1:2121:21"
       - "127.0.0.1:21100-21109:21100-21109"
     volumes:
       - ./data/ftp:/home/deploy
-      - ./vsftpd.conf:/vsftpd.conf:ro
+      # whole directory: a single-file bind mount goes stale when git recreates the file on a branch switch
+      - .:/servers:ro
 
   sftp:
     image: lscr.io/linuxserver/openssh-server:latest
