@@ -29,3 +29,10 @@ services:
       - "127.0.0.1:2222:2222"
     volumes:
       - ./data/sftp:/config/www
+
+  sftp-restricted:
+    build: ./sftp-restricted
+    ports:
+      - "127.0.0.1:2223:22"
+    volumes:
+      - ./data/sftp-restricted:/home/deploy/www
