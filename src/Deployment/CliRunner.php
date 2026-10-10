@@ -24,6 +24,7 @@ class CliRunner
 		'include' => '',
 		'ignore' => '',
 		'allowdelete' => true,
+		'followredirects' => true,
 		'purge' => '',
 		'before' => '',
 		'afterupload' => '',
@@ -186,6 +187,7 @@ class CliRunner
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
 		$deployment->allowDelete = (bool) $config['allowdelete'];
+		$deployment->followRedirects = (bool) $config['followredirects'];
 		$deployment->toPurge = self::toArray($config['purge'], true);
 		$deployment->runBefore = self::toArray($config['before'], true);
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);
