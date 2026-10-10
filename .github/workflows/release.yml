@@ -25,7 +25,7 @@ jobs:
 
             # manual run only checks the build, a release is created from a tag
             - if: github.event_name == 'workflow_dispatch'
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               with:
                   name: deployment.phar
                   path: deployment.phar
