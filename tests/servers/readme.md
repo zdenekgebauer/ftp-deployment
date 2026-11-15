@@ -11,6 +11,7 @@ php ../../deployment phpsec.ini     # phpsec://deploy:deploy@127.0.0.1:2222/conf
 php ../../deployment sftp-restricted.ini    # 127.0.0.1:2223, SFTP refuses mkdir/chmod (internal-sftp -P), shell allows them
 php ../../deployment phpsec-restricted.ini  # the same server via phpseclib
 ./ftps-drop.sh     # ftps://deploy:deploy@127.0.0.1:2990/site, resets the connections mid-deploy, must recover
+php rename-retry.php [url]          # renameFile() retried after a lost reply keeps the file (ftp:// by default, or the ftps:// url)
 docker compose down
 ```
 
