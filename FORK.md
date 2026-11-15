@@ -15,8 +15,8 @@ Fork [dg/ftp-deployment](https://github.com/dg/ftp-deployment). Dokumentace upst
 | build pharu přes [Box](https://github.com/box-project/box) (`box` a `composer` v PATH): `./build-phar.sh [out.phar]` | `box.json`, `build-phar.sh`, `.gitignore` | upstream build skript nemá (`AGENTS.md` odkazuje na neexistující `create-phar/`) |
 | release s pharem: tag `v*` → testy, `build-phar.sh`, GitHub Release s `deployment.phar`; ruční spuštění jen uloží phar jako artefakt | `.github/workflows/release.yml` | jen ve forku |
 | `finally[]` joby: běží na konci každého deploye (i neúspěšného nebo bez synchronizace), chyba jednoho nezastaví ostatní ani nepřebije chybu deploye; přeskočí se jen, když deploy odmítne zámek `.running` | `src/Deployment/Deployer.php`, `src/Deployment/CliRunner.php`, `tests/Deployer.finally.phpt`, `readme.md`, `deployment.sample.ini`, `docs/internals.md` | jen ve forku |
-| volba `followRedirects` (výchozí `true`) pro `http(s)://` joby; při `false` je přesměrování chybou | `src/Deployment/Helpers.php`, `src/Deployment/JobRunner.php`, `src/Deployment/Deployer.php`, `src/Deployment/CliRunner.php`, `readme.md`, `deployment.sample.ini` | jen ve forku |
-| `sftp://` a `phpsec://`: `mkdir` a `chmod` se při odmítnutí SFTP serverem zkusí přes shell | `src/Deployment/SshServer.php`, `src/Deployment/PhpsecServer.php`, `tests/servers/` (`*-restricted.ini`) | jen ve forku |
+| volba `followRedirects` (výchozí `true`) pro `http(s)://` joby; při `false` je přesměrování chybou | `src/Deployment/Helpers.php`, `src/Deployment/JobRunner.php`, `src/Deployment/Deployer.php`, `src/Deployment/CliRunner.php`, `readme.md`, `deployment.sample.ini` | PR [#187](https://github.com/dg/ftp-deployment/pull/187) (větev `http-follow-redirects`) |
+| `sftp://` a `phpsec://`: `mkdir` a `chmod` se při odmítnutí SFTP serverem zkusí přes shell | `src/Deployment/SshServer.php`, `src/Deployment/PhpsecServer.php`, `tests/servers/` (`*-restricted.ini`) | PR [#186](https://github.com/dg/ftp-deployment/pull/186) (větev `sftp-shell-fallback`) |
 
 ## Převzato upstreamem
 
