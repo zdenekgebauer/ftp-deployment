@@ -7,6 +7,21 @@ Fork [dg/ftp-deployment](https://github.com/dg/ftp-deployment). Dokumentace upst
 - `master` = `upstream/master` + vlastní úpravy níže; z něj se builduje phar
 - PR větve vždy od `upstream/master`, bez souborů jen pro fork (`FORK.md`, `tests/servers/`)
 
+## Releasy
+
+Tag `vX.Y.Z-zg.N` na `master`: `X.Y.Z` = verze upstreamu, na které fork stojí, `N` od 1 pro každou verzi upstreamu.
+Push tagu spustí `.github/workflows/release.yml` (testy, `build-phar.sh`, GitHub Release s `deployment.phar`
+a automaticky vygenerovanými poznámkami). Phar hlásí verzi upstreamu (`CliRunner::Version`), ne tag forku.
+
+Postup: testy a kontroly stylu (`CLAUDE.md`), testy proti serverům v `tests/servers/` u změn v serverech, záznam níže,
+commit, pak `git tag vX.Y.Z-zg.N && git push origin master vX.Y.Z-zg.N`. Po vydání zkopírovat `deployment.phar`
+do projektů, které ho používají (pustejov, eshopvotim, Butiko).
+
+| tag | základ | obsah |
+|---|---|---|
+| `v3.8.1-zg.1` | upstream v3.8.1 | fork přenesený na přepsanou historii upstreamu; FTPS po výpadku spojení: zavření starého spojení (dřív fatal `SSL_shutdown failed`) a bezpečné opakování přejmenování; `finally[]` při zámku `.running` přeskočeno. Ověřeno full deployem pustejov na Wedos přes `ftps://` (2006 souborů, výpadek spojení zhruba každých 100–300 souborů) |
+| `v3.7.0-zg.1`–`zg.3` | upstream v3.7.0 (před force-pushem) | build a release pharu, fallback `mkdir`/`chmod` přes shell, `finally[]`, `followRedirects`; tagy leží na staré historii, z `master` nejsou dosažitelné |
+
 ## Odchylky od upstreamu
 
 | úprava | soubory | stav upstreamu |
