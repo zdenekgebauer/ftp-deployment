@@ -17,6 +17,20 @@ services:
       # whole directory: a single-file bind mount goes stale when git recreates the file on a branch switch
       - .:/servers:ro
 
+  ftps:
+    build: ./ftps
+    # ss -K in ftps-drop.sh resets connections
+    cap_add: [NET_ADMIN]
+    environment:
+      USERS: "deploy|deploy|/home/deploy|1000"
+    command: sh -c "install -m 644 /servers/vsftpd-ftps.conf /etc/vsftpd/vsftpd.conf && exec vsftpd /etc/vsftpd/vsftpd.conf"
+    ports:
+      - "127.0.0.1:2990:21"
+      - "127.0.0.1:21110-21119:21110-21119"
+    volumes:
+      - ./data/ftps:/home/deploy
+      - .:/servers:ro
+
   sftp:
     image: lscr.io/linuxserver/openssh-server:latest
     environment:
