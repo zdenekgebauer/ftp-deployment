@@ -14,6 +14,13 @@ Fork [dg/ftp-deployment](https://github.com/dg/ftp-deployment). Dokumentace upst
 | testovací FTP/SFTP servery v Dockeru | `tests/servers/` | jen ve forku |
 | build pharu přes [Box](https://github.com/box-project/box) (`box` a `composer` v PATH): `./build-phar.sh [out.phar]` | `box.json`, `build-phar.sh`, `.gitignore` | upstream build skript nemá (`AGENTS.md` odkazuje na neexistující `create-phar/`) |
 | release s pharem: tag `v*` → testy, `build-phar.sh`, GitHub Release s `deployment.phar`; ruční spuštění jen uloží phar jako artefakt | `.github/workflows/release.yml` | jen ve forku |
-| `remote: mkdir\|rmdir\|unlink\|mv\|chmod` bere relativní cestu vůči `remote`, absolutní ponechá (upstream od `34243a3` dělá z `x` vždy `/x`) | `src/Deployment/JobRunner.php`, `tests/JobRunner.remote.phpt` | PR [#181](https://github.com/dg/ftp-deployment/pull/181) (větev `fix-remote-job-paths`), issue [#180](https://github.com/dg/ftp-deployment/issues/180) |
-| CI: oprava matice PHP v `tests.yml` (testy v upstreamu od `53d1e08` neběží), test přeskočených operací nezávislý na pořadí souborů, klíč cache preprocesoru opět obsahuje název filtru (phpstan) | `.github/workflows/tests.yml`, `tests/Deployer.interrupt.phpt`, `src/Deployment/Deployer.php` | PR [#182](https://github.com/dg/ftp-deployment/pull/182) (větev `fix-tests-workflow`) |
-| `Helpers::fetchUrl()` posílá User-Agent i v záložní větvi bez ext-curl (WEDOS.protection jinak vrací 401) | `src/Deployment/Helpers.php` | PR [#183](https://github.com/dg/ftp-deployment/pull/183) (větev `fetchurl-user-agent`) |
+| `finally[]` joby: běží na konci každého deploye (i neúspěšného nebo bez synchronizace), chyba jednoho nezastaví ostatní ani nepřebije chybu deploye; přeskočí se jen, když deploy odmítne zámek `.running` | `src/Deployment/Deployer.php`, `src/Deployment/CliRunner.php`, `tests/Deployer.finally.phpt`, `readme.md`, `deployment.sample.ini`, `docs/internals.md` | jen ve forku |
+| volba `followRedirects` (výchozí `true`) pro `http(s)://` joby; při `false` je přesměrování chybou | `src/Deployment/Helpers.php`, `src/Deployment/JobRunner.php`, `src/Deployment/Deployer.php`, `src/Deployment/CliRunner.php`, `readme.md`, `deployment.sample.ini` | jen ve forku |
+| `sftp://` a `phpsec://`: `mkdir` a `chmod` se při odmítnutí SFTP serverem zkusí přes shell | `src/Deployment/SshServer.php`, `src/Deployment/PhpsecServer.php`, `tests/servers/` (`*-restricted.ini`) | jen ve forku |
+
+## Převzato upstreamem
+
+Upstream ve v3.8.0 převzal (po force-pushi `master`, fork je od v3.8.1 přenesený na novou historii):
+`remote:` cesty relativní vůči `remote` (PR #181, issue #180 → `3107c08`), test přeskočených operací nezávislý na pořadí
+(PR #182 → `d88a380`), klíč cache filtrů (PR #182 → `61053eb`), User-Agent bez ext-curl (PR #183 → `ec14741`);
+CI matici PHP opravil sám.
