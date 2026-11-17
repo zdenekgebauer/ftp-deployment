@@ -53,7 +53,6 @@ class Deployer
 
 	private string $localDir;
 	private string $remoteDir;
-	private bool $lockedByOther = false;
 
 	/** @var string[] temporary files to delete when the run finishes */
 	private array $garbage = [];
@@ -84,7 +83,7 @@ class Deployer
 	 */
 	public function deploy(): void
 	{
-		$this->lockedByOther = false;
+		unset($this->remoteDir); // initialized only once connected, see runFinallyJobs()
 		try {
 			$this->synchronize();
 		} catch (\Throwable $e) {
@@ -326,15 +325,20 @@ class Deployer
 	{
 		if (!$this->runFinally || $this->testMode) {
 			return;
-		} elseif ($this->lockedByOther) {
+		} elseif ($deployError instanceof LockedException) {
 			// the jobs would interfere with the deployment that holds the lock
 			$this->logger->log("\nFinally-jobs skipped, another deployment is running.", 'maroon');
 			return;
 		}
 
 		$this->logger->log("\nFinally-jobs:");
+		$connected = isset($this->remoteDir);
 		$firstError = null;
 		foreach ($this->runFinally as $job) {
+			if (!$connected && is_string($job) && preg_match('#^(remote|upload|download):#', $job)) {
+				$this->logger->log("$job: skipped, not connected to the server", 'maroon');
+				continue;
+			}
 			try {
 				$this->runJobs([$job]);
 			} catch (TerminatedException $e) {
@@ -380,8 +384,7 @@ class Deployer
 		} catch (ServerException) {
 			return; // not present -> free to deploy
 		}
-		$this->lockedByOther = true;
-		throw new ServerException(
+		throw new LockedException(
 			'Another deployment is running or a previous one was interrupted '
 			. "($this->deploymentFile.running exists on the server). Use --force to override.",
 		);
@@ -711,7 +714,7 @@ class Deployer
 	 */
 	private function runJobs(array $jobs): void
 	{
-		$runner = new JobRunner($this->server, $this->localDir, $this->remoteDir);
+		$runner = new JobRunner($this->server, $this->localDir, $this->remoteDir ?? '');
 		$runner->followRedirects = $this->followRedirects;
 
 		foreach ($jobs as $job) {
