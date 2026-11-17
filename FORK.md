@@ -32,8 +32,7 @@ do projektů, které ho používají (pustejov, eshopvotim, Butiko).
 | `finally[]` joby: běží na konci každého deploye (i neúspěšného nebo bez synchronizace), chyba jednoho nezastaví ostatní ani nepřebije chybu deploye; přeskočí se, když deploy odmítne zámek `.running` (`LockedException`); bez připojení k serveru se přeskočí jen `remote:`, `upload:` a `download:` | `src/Deployment/Deployer.php`, `src/Deployment/LockedException.php`, `src/Deployment/CliRunner.php`, `tests/Deployer.finally.phpt`, `readme.md`, `deployment.sample.ini`, `docs/internals.md` | PR [#188](https://github.com/dg/ftp-deployment/pull/188) (větev `finally-jobs`) |
 | volba `followRedirects` (výchozí `true`) pro `http(s)://` joby; při `false` je přesměrování chybou | `src/Deployment/Helpers.php`, `src/Deployment/JobRunner.php`, `src/Deployment/Deployer.php`, `src/Deployment/CliRunner.php`, `readme.md`, `deployment.sample.ini` | PR [#187](https://github.com/dg/ftp-deployment/pull/187) (větev `http-follow-redirects`) |
 | `sftp://` a `phpsec://`: `mkdir` a `chmod` se při odmítnutí SFTP serverem zkusí přes shell; cesty quotuje pro POSIX (`Helpers::escapeShellArg()`), ne pro lokální OS jako `escapeshellarg()`, který na Windows zahodí `%` a `!` | `src/Deployment/BaseServer.php`, `src/Deployment/SshServer.php`, `src/Deployment/PhpsecServer.php`, `src/Deployment/Helpers.php`, `tests/Helpers.escapeShellArg.phpt`, `tests/servers/` (`*-restricted.ini`, `shell-fallback.php`) | PR [#186](https://github.com/dg/ftp-deployment/pull/186) (větev `sftp-shell-fallback`) |
-| FTPS: `FtpServer` při reconnectu a v destruktoru staré spojení explicitně zavře (`ftp_close()` s timeoutem 1 s, chyby ignoruje); spojení předané `ftp_*()`, jehož varování `Safe` převedl na výjimku, PHP nikdy neuvolní a jeho pozdější uvolnění po výpadku hlásí `SSL_shutdown failed`, z čehož CLI handler udělá fatal error (Wedos) | `src/Deployment/FtpServer.php`, `tests/servers/` (`ftps-drop.sh`, `ftps-reset.php`) | jen ve forku |
-| `FtpServer::renameFile()` po výpadku: když se ztratí odpověď na `RNTO`, opakovaný pokus (`RetryServer`) dřív smazal právě přejmenovaný soubor a selhal na chybějícím dočasném; teď si rozpracované přejmenování pamatuje a při opakování ověří přes `ftp_size()`, jestli už proběhlo | `src/Deployment/FtpServer.php`, `src/Deployment/Safe.php`, `tests/servers/rename-retry.php` | jen ve forku |
+| komentář u `FtpServer::disconnect()`, proč se spojení zavírá explicitně (upstream ho při převzetí #189 vypustil) | `src/Deployment/FtpServer.php` | jen ve forku |
 
 ## Převzato upstreamem
 
@@ -41,3 +40,8 @@ Upstream ve v3.8.0 převzal (po force-pushi `master`, fork je od v3.8.1 přenese
 `remote:` cesty relativní vůči `remote` (PR #181, issue #180 → `3107c08`), test přeskočených operací nezávislý na pořadí
 (PR #182 → `d88a380`), klíč cache filtrů (PR #182 → `61053eb`), User-Agent bez ext-curl (PR #183 → `ec14741`);
 CI matici PHP opravil sám.
+
+Ve 3.8-dev převzal PR #189: FTPS `FtpServer` při reconnectu a v destruktoru staré spojení explicitně zavře
+(dřív po výpadku fatal `SSL_shutdown failed`, Wedos) → `4047530`; `renameFile()` opakovaný po ztracené odpovědi
+na `RNTO` nesmaže přejmenovaný soubor → `83ad7d1`. Testy proti serverům k nim zůstávají v `tests/servers/`
+(`ftps-drop.sh`, `ftps-reset.php`, `rename-retry.php`).
